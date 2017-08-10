@@ -3,27 +3,91 @@
 <head>
   <title>3D atom modeling pilot</title>
   <meta charset="utf-8">
+  <style>
+  .controls {
+     position:absolute;
+	 right:50px;
+	 top  :20px;  
+  }
+  
+  .button {
+	padding: 5px;
+	margin-left: 15px;
+	margin-bottom: 15px;
+	width: auto;
+	height: 35px;
+	cursor: pointer;
+	background-color: white;
+	background-repeat: no-repeat;
+	border-radius: 4px;
+  }
+  
+  .rangeBox {
+	position:absolute;
+	 right:50px;
+	 top  :200px; 
+	 align: right;
+  }
+  </style>
 </head>
 <body style="margin: 0;">
-<button> button </button>
+<div class="controls">
+<button class="button" id="hide" onclick="removeEntity(group)"> hide </button><br>
+<button class="button" id="show" onclick="addEntity(group)"> show </button><br>
+<button class="button" id="color" onclick="newTexture(group)"> red </button><br><br>
+</div>
+<div class="rangeBox">
+<span id="valBox"></span>
+<input id="slider" type="range" min="0" max="300" />
+<p class="note">Current value: <span id="currentValue"> </span></p>
 
+</div>
   <script src="js/three.min.js"></script>
   <script src="js/OrbitControls.js"></script>
 
   <script>
+  
 
+    /*var currentValue = $('#currentValue');
+
+    $('#slider').change(function(){
+        currentValue.html(this.value);
+    });
+    $('#slider').change();*/
+	
     // Set up the scene, camera, and renderer as global variables.
     var scene, camera, renderer;
 
     init();
     animate();
+	
+	function removeEntity(group) {
+		group.traverse( function ( group ) { group.visible = false; } );
+	}
+	
+	function addEntity(group) {
+		group.traverse( function ( group ) { group.visible = true; } );
+	}
+	
+	function newTexture(group) {		
+		scene.traverse( function( group ) {
+			if ( group instanceof THREE.Mesh ) {
+
+			var bitmap = new Image();
+			bitmap.src = 'models/red.jpg'
+
+			group.material.map = THREE.ImageUtils.loadTexture(bitmap.src);
+			group.group.material.needsUpdate = true;
+			}
+		});
+	}
 
     // Sets up the scene.
     function init() {
 
 		// Create the scene and set the scene size.
 		scene = new THREE.Scene();
-		var WIDTH = window.innerWidth/2,
+		var WIDTH = window.innerWidth;
 			HEIGHT = window.innerHeight;
 
 		// Create a renderer and add it to the DOM.
@@ -77,11 +141,25 @@
 			for (var i = 0; i < atoms.length; i++) {
 			
 				instance = sphere.clone();
+				if(i == 0) {
+					instance.name = "original";
+				}
+				else {
+					instance.name = i;
+				}
 				instance.position.set( atoms[i].x, atoms[i].y, atoms[i].z );
 				group.add( instance );
-					
 			}
+			group.name = "cluster";
 			scene.add(group);
+			
+			for (var i = 1; i < atoms.length; i++) {
+			
+				var temp = group.getObjectByName(i);
+				temp.position.set(atoms[i].x, atoms[i].y, atoms[i].z);
+			
+			}
+			
 		});
 	
 		//make the image even on the sphere
@@ -126,6 +204,8 @@
       controls.update();
 
     }
+
+	
 
   </script>
 
