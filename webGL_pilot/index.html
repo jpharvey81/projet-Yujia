@@ -33,14 +33,14 @@
 <body style="margin: 0;">
 <div class="controls">
 <button class="button" id="hide" onclick="removeEntity(atom)"> hide </button><br>
-<button class="button" id="show" onclick="addEntity(objects)"> show </button><br>
-<button class="button" id="color" onclick="newTexture(objects)"> red </button><br>
-<button class="button" id="next" onclick="next(objects)"> next </button><br><br>
+<button class="button" id="show" onclick="addEntity(atom)"> show </button><br>
+<button class="button" id="color" onclick="newTexture(atom)"> red </button><br>
+<button class="button" id="next" onclick="next(atom)"> next </button><br><br>
 </div>
 <div class="rangeBox">
 <span id="valBox"></span>
-<input id="slider" type="range" min="0" max="300" />
-<p class="note">Current value: <span id="currentValue"> </span></p>
+<input id="slider" type="range" min="0" max="300" value="100"/>
+<p class="note">Current value: <span id="currentValue">  </span></p>
 
 </div>
   <script src="js/three.min.js"></script>
@@ -65,31 +65,61 @@
 	
 	function removeEntity(atom) {
 	
-		var hidden = scene.getObjectByName(atom.name);
-		scene.remove( hidden );
-		//atom.traverse( function ( atom ) { atom.visible = false; } );
-
+		for (var i = 0; i < group.length; i++) {			
+			var atom = group[i];
+			atom.traverse( function ( atom ) { atom.visible = false; } )		
+		}
 	}
 	
-	function addEntity(group) {
-		group.traverse( function ( group ) { group.visible = true; } );
+	function addEntity(atom) {
+	
+		for (var i = 0; i < group.length; i++) {
+			var atom = group[i];
+			atom.traverse( function ( atom ) { atom.visible = true; } )		
+		}
 	}
 	
-	function newTexture(group) {		
-		scene.traverse( function( group ) {
-			if ( group instanceof THREE.Mesh ) {
+	function newTexture(atom) {
+	
+		for (var i = 0; i < group.length; i++) {
+		
+			var atom = group[i];
+			scene.traverse( function( atom ) {
+				if ( atom instanceof THREE.Mesh ) {
 
-			var bitmap = new Image();
-			bitmap.src = 'models/red.jpg'
-
-			group.material.map = THREE.ImageUtils.loadTexture(bitmap.src);
-			group.group.material.needsUpdate = true;
+					var bitmap = new Image();
+					bitmap.src = 'models/red.jpg'
+					atom.material.map = THREE.ImageUtils.loadTexture(bitmap.src);
+					atom.group.material.needsUpdate = true;
+				}
+			});	
+		}
+	}
+	
+	function next(atom){
+		
+		fetch('Une_image_256_atomes2.txt').then(response => response.text()).then(text => {
+		
+			for (var i = 0; i < group.length; i++) {
+				var atom = group[i];
+				atom.traverse( function ( atom ) { 	
+					const atoms = text.split('\n')  // split into lines
+					.map(line => line.trim())     // remove whitespace at the beginning and end
+					.map(line => line.split(' ')) // split by ' '
+					.map(([size, x, y, z]) => ({ 
+					  size: Number(size), 
+					  x: Number(x), 
+					  y: Number(y), 
+					  z: Number(z) 
+					}));
+						
+					atom.position.set( atoms[i].x, atoms[i].y, atoms[i].z );
+				} )
 			}
 		});
 	}
 	
-	function next(group){
-		var selectedObject = scene.getObjectByName(group.name);
+		/*var selectedObject = scene.getObjectByName(group.name);
 		scene.remove( selectedObject );
 		
 		group = new THREE.Object3D();
@@ -120,8 +150,7 @@
 			}
 			group.name = "cluster";
 			scene.add(group);		
-		});
-	}
+		});*/
 	
 
     // Sets up the scene.
@@ -138,8 +167,12 @@
 		document.body.appendChild(renderer.domElement);
 
 		// Create a camera, zoom it out from the model a bit, and add it to the scene.
-		camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 1, 10000);
-		camera.position.set( 30, 30, 30 );
+		//camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 1, 10000);
+		//camera.position.set( 30, 30, 30 );
+		
+		camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 5000 );
+		camera.position.set( 25, 25, 25 );
+		camera.lookAt( new THREE.Vector3() );
 
 		scene.add(camera);
 	  
@@ -227,18 +260,11 @@
 	    raycaster.setFromCamera( mouse3D, camera );
 		var intersects = raycaster.intersectObjects( group );
 		
-		intersects.object.material.color.setHex( Math.random() * 0xffffff );
+		for(var i = 0; i < group.length; i++) {
 		
-		scene.traverse( function( group ) {
-			if ( group instanceof THREE.Mesh ) {
-
-			var bitmap = new Image();
-			bitmap.src = 'models/red.jpg'
-
-			group.material.map = THREE.ImageUtils.loadTexture(bitmap.src);
-			group.group.material.needsUpdate = true;
-			}
-		});
+			intersects.object.material.color.setHex( Math.random() * 0xffffff );
+		
+		}
 
 	}	
 
@@ -250,8 +276,6 @@
       controls.update();
 
     }
-
-	
 
   </script>
 
