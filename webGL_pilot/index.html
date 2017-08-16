@@ -5,9 +5,9 @@
   <meta charset="utf-8">
   <style>
   .controls {
-     position:absolute;
-	 right:50px;
-	 top  :20px;  
+	position:absolute;
+	right:121px;
+	top  :26px;
   }
   
   .button {
@@ -24,18 +24,19 @@
   
   .rangeBox {
 	position:absolute;
-	 right:50px;
-	 top  :280px; 
-	 align: right;
+	right:46px;
+	top  :325px;
+	align: right;
   }
   </style>
 </head>
 <body style="margin: 0;">
 <div class="controls">
-<button class="button" id="hide" onclick="removeEntity(atom)"> hide </button><br>
-<button class="button" id="show" onclick="addEntity(atom)"> show </button><br>
-<button class="button" id="color" onclick="newTexture(atom)"> red </button><br>
-<button class="button" id="next" onclick="next(atom)"> next </button><br><br>
+<button class="button" id="hide" onClick="removeEntity(atom)"> hide </button><br>
+<button class="button" id="show" onClick="addEntity(atom)"> show </button><br>
+<button class="button" id="color" onClick="red(atom)"> red </button><br>
+<button class="button" id="color" onClick="white(atom)"> white </button><br>
+<button class="button" id="next" onClick="next(atom)"> next </button><br><br>
 </div>
 <div class="rangeBox">
 <span id="valBox"></span>
@@ -43,13 +44,10 @@
 <p class="note">Current value: <span id="currentValue">  </span></p>
 
 </div>
-  <script src="js/three.min.js"></script>
+<script src="js/three.min.js"></script>
   <script src="js/OrbitControls.js"></script>
   <script src="js/three.js"></script>
-
-  <script>
-  
-
+<script>
     /*var currentValue = $('#currentValue');
 
     $('#slider').change(function(){
@@ -64,32 +62,44 @@
     animate();
 	
 	function removeEntity(atom) {
-	
 		for (var i = 0; i < group.length; i++) {			
 			var atom = group[i];
-			atom.traverse( function ( atom ) { atom.visible = false; } )		
+			scene.traverse( function ( atom ) { atom.visible = false; } )		
 		}
 	}
 	
 	function addEntity(atom) {
-	
 		for (var i = 0; i < group.length; i++) {
 			var atom = group[i];
-			atom.traverse( function ( atom ) { atom.visible = true; } )		
+			scene.traverse( function ( atom ) { atom.visible = true; } )		
 		}
 	}
 	
-	function newTexture(atom) {
-	
+	function red(atom) {
 		for (var i = 0; i < group.length; i++) {
-		
 			var atom = group[i];
 			scene.traverse( function( atom ) {
 				if ( atom instanceof THREE.Mesh ) {
-
-					var bitmap = new Image();
-					bitmap.src = 'models/red.jpg'
-					atom.material.map = THREE.ImageUtils.loadTexture(bitmap.src);
+					var text = THREE.ImageUtils.loadTexture( "models/red.jpg" ); 
+					atom.material.map = text;
+					atom.group.material.needsUpdate = true;
+				}
+			});	
+		}
+	}
+	
+	function white(atom) {
+		for (var i = 0; i < group.length; i++) {
+			var atom = group[i];
+			scene.traverse( function( atom ) {
+				if ( atom instanceof THREE.Mesh ) {
+					//var text = THREE.ImageUtils.loadTexture( "models/white.jpg" ); 
+					//var mat = new THREE.MeshPhongMaterial({name: "test", map: text});
+					//atom.material = mat;
+					//atom.group.material.needsUpdate = true;
+				//}
+					var text = THREE.ImageUtils.loadTexture( "models/white.jpg" ); 
+					atom.material.map = text;
 					atom.group.material.needsUpdate = true;
 				}
 			});	
@@ -97,9 +107,7 @@
 	}
 	
 	function next(atom){
-		
 		fetch('Une_image_256_atomes2.txt').then(response => response.text()).then(text => {
-		
 			for (var i = 0; i < group.length; i++) {
 				var atom = group[i];
 				atom.traverse( function ( atom ) { 	
@@ -112,50 +120,14 @@
 					  y: Number(y), 
 					  z: Number(z) 
 					}));
-						
 					atom.position.set( atoms[i].x, atoms[i].y, atoms[i].z );
 				} )
 			}
 		});
 	}
 	
-		/*var selectedObject = scene.getObjectByName(group.name);
-		scene.remove( selectedObject );
-		
-		group = new THREE.Object3D();
-	
-		var bitmap = new Image();
-		bitmap.src = 'models/white.jpg'
-		var texture = THREE.ImageUtils.loadTexture(bitmap.src); // Create texture object based on the given bitmap path.
-		var material = new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0x050505, shininess: 50, map: texture }); // Create a material (for the spherical mesh) that reflects light, potentially causing sphere surface shadows.
-		var geometry = new THREE.SphereGeometry(1, 64, 64); // Radius size, number of vertical segments, number of horizontal rings.
-		var sphere = new THREE.Mesh(geometry, material); 
-	
-		fetch('Une_image_256_atomes2.txt').then(response => response.text()).then(text => {
-		  const atoms = text.split('\n')  // split into lines
-			.map(line => line.trim())     // remove whitespace at the beginning and end
-			.map(line => line.split(' ')) // split by ' '
-			.map(([size, x, y, z]) => ({ 
-			  size: Number(size), 
-			  x: Number(x), 
-			  y: Number(y), 
-			  z: Number(z) 
-			}));
-			
-			for (var i = 0; i < atoms.length; i++) {
-			
-				instance = sphere.clone();
-				instance.position.set( atoms[i].x, atoms[i].y, atoms[i].z );
-				group.add( instance );
-			}
-			group.name = "cluster";
-			scene.add(group);		
-		});*/
-	
-
     // Sets up the scene.
     function init() {
-
 		// Create the scene and set the scene size.
 		scene = new THREE.Scene();
 		var WIDTH = window.innerWidth;
@@ -214,21 +186,12 @@
 			}));
 			
 			for (var i = 0; i < atoms.length; i++) {
-			
 				atom = sphere.clone();
 				atom.position.set( atoms[i].x, atoms[i].y, atoms[i].z );
 				atom.name = "atom";
 				scene.add( atom );
 				group.push( atom );
-			}
-			
-			/*for (var i = 1; i < atoms.length; i++) {
-			
-				var temp = group.getObjectByName(i);
-				temp.position.set(atoms[i].x, atoms[i].y, atoms[i].z);
-			
-			}*/
-			
+			}			
 		});
 	
 		//make the image even on the sphere
@@ -240,10 +203,8 @@
 			for ( var j = 0; j < 3; j ++ ) {
 				uvs[ j ].x = face.vertexNormals[ j ].x * 0.5 + 0.5;
 				uvs[ j ].y = face.vertexNormals[ j ].y * 0.5 + 0.5;
-
 			}
 		}
-		
 		// Add OrbitControls so that we can pan around with the mouse.
 		controls = new THREE.OrbitControls(camera, renderer.domElement);
     }
@@ -252,20 +213,21 @@
 	function onDocumentMouseDown( event ) {    
 	
 		event.preventDefault();
-		var mouse3D = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, -( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );     
-		
-		console.log("Mouse1 X " + mouse3D.x  + "          Mouse1 Y " + mouse3D.y);
+		var mouse3D = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, -( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+		//console.log("Mouse1 X " + mouse3D.x  + "          Mouse1 Y " + mouse3D.y);
 
 		var raycaster =  new THREE.Raycaster();                                        
 	    raycaster.setFromCamera( mouse3D, camera );
 		var intersects = raycaster.intersectObjects( group );
 		
-		for(var i = 0; i < group.length; i++) {
+		if (intersects.length > 0) {
 		
-			intersects.object.material.color.setHex( Math.random() * 0xffffff );
-		
+		var text = THREE.ImageUtils.loadTexture( "models/red.jpg" ); 
+		var mat = new THREE.MeshPhongMaterial({name: "test", map: text});
+			//console.log(intersects[ 0 ].object)
+			intersects[ 0 ].object.material = mat;
+			intersects[ 0 ].object.material.needsUpdate = true;
 		}
-
 	}	
 
     // Renders the scene and updates the render as needed.
