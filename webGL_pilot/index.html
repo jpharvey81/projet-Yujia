@@ -6,8 +6,8 @@
   <style>
   .controls {
 	position:absolute;
-	right:121px;
-	top  :26px;
+	right:120px;
+	top  :9px;
   }
   
   .button {
@@ -24,8 +24,8 @@
   
   .rangeBox {
 	position:absolute;
-	right:46px;
-	top  :325px;
+	right:47px;
+	top  :498px;
 	align: right;
   }
   </style>
@@ -36,7 +36,9 @@
 <button class="button" id="show" onClick="addEntity(atom)"> show </button><br>
 <button class="button" id="color" onClick="red(atom)"> red </button><br>
 <button class="button" id="color" onClick="white(atom)"> white </button><br>
-<button class="button" id="next" onClick="next(atom)"> next </button><br><br>
+<button class="button" id="next" onClick="next(atom)"> next </button><br>
+<button class="button" id="next" onClick="back(atom)"> back </button><br>
+<button class="button" id="next" onClick="moveAtom(atom)"> RUN </button><br><br>
 </div>
 <div class="rangeBox">
 <span id="valBox"></span>
@@ -57,6 +59,18 @@
 	
     // Set up the scene, camera, and renderer as global variables.
     var scene, camera, renderer;
+	
+	var Colors = {
+		red:0xf25346,
+		white:0xffffff,
+		brown:0x59332e,
+		pink:0xF5986E,
+		brownDark:0x23190f,
+		blue:0x68c3c0,
+	};
+	
+	const size = 256;
+	positions = [];
 
     init();
     animate();
@@ -80,9 +94,8 @@
 			var atom = group[i];
 			scene.traverse( function( atom ) {
 				if ( atom instanceof THREE.Mesh ) {
-					var text = THREE.ImageUtils.loadTexture( "models/red.jpg" ); 
-					atom.material.map = text;
-					atom.group.material.needsUpdate = true;
+					atom.material = new THREE.MeshPhongMaterial({ color: Colors.red, specular: 0x050505, shininess: 50 });;
+					atom.material.needsUpdate = true;
 				}
 			});	
 		}
@@ -93,57 +106,100 @@
 			var atom = group[i];
 			scene.traverse( function( atom ) {
 				if ( atom instanceof THREE.Mesh ) {
-					//var text = THREE.ImageUtils.loadTexture( "models/white.jpg" ); 
-					//var mat = new THREE.MeshPhongMaterial({name: "test", map: text});
-					//atom.material = mat;
-					//atom.group.material.needsUpdate = true;
-				//}
-					var text = THREE.ImageUtils.loadTexture( "models/white.jpg" ); 
-					atom.material.map = text;
-					atom.group.material.needsUpdate = true;
+					atom.material = new THREE.MeshPhongMaterial({ color: Colors.white, specular: 0x050505, shininess: 50 });;
+					atom.material.needsUpdate = true;
 				}
 			});	
 		}
 	}
 	
 	function next(atom){
-		fetch('Une_image_256_atomes2.txt').then(response => response.text()).then(text => {
-			for (var i = 0; i < group.length; i++) {
-				var atom = group[i];
-				atom.traverse( function ( atom ) { 	
-					const atoms = text.split('\n')  // split into lines
-					.map(line => line.trim())     // remove whitespace at the beginning and end
-					.map(line => line.split(' ')) // split by ' '
-					.map(([size, x, y, z]) => ({ 
-					  size: Number(size), 
-					  x: Number(x), 
-					  y: Number(y), 
-					  z: Number(z) 
-					}));
-					atom.position.set( atoms[i].x, atoms[i].y, atoms[i].z );
-				} )
-			}
-		});
+		fetch('Petit_film_256_atomes.txt').then(response => response.text()).then(text => {
+			var i = 500;
+				for (var j = 0; j < 256; j++) {
+					atom.traverse( function ( atom ) { 
+						const arr = text.split('\n')
+							.map(line => line.trim())
+							.map((arr) => arr.split(' '))
+							.map(([size, x, y, z]) => ({ 
+								  size: Number(size), 
+								  x: Number(x), 
+								  y: Number(y), 
+								  z: Number(z) 
+							}));
+						while (arr.length > 0)
+							positions.push(arr.splice(0, size).slice(2));
+		
+						var atom = group[j];
+						atom.position.set( positions[i][j].x, positions[i][j].y, positions[i][j].z );
+					})
+				}
+		})	
 	}
 	
+	function back(atom){
+		const size = 256;
+		positions = [];
+		fetch('Petit_film_256_atomes.txt').then(response => response.text()).then(text => {
+			var i = 0;
+				for (var j = 0; j < 256; j++) {
+					atom.traverse( function ( atom ) { 
+						const arr = text.split('\n')
+							.map(line => line.trim())
+							.map((arr) => arr.split(' '))
+							.map(([size, x, y, z]) => ({ 
+								  size: Number(size), 
+								  x: Number(x), 
+								  y: Number(y), 
+								  z: Number(z) 
+							}));
+						while (arr.length > 0)
+							positions.push(arr.splice(0, size).slice(2));
+		
+						var atom = group[j];
+						atom.position.set( positions[i][j].x, positions[i][j].y, positions[i][j].z );
+					})
+				}
+		})	
+	}
+	
+	function moveAtom(atom) {
+		const size = 256;
+		positions = [];
+		fetch('Petit_film_256_atomes.txt').then(response => response.text()).then(text => {
+			var i = 250;
+				for (var j = 0; j < 256; j++) {
+					atom.traverse( function ( atom ) { 
+						const arr = text.split('\n')
+							.map(line => line.trim())
+							.map((arr) => arr.split(' '))
+							.map(([size, x, y, z]) => ({ 
+								  size: Number(size), 
+								  x: Number(x), 
+								  y: Number(y), 
+								  z: Number(z) 
+							}));
+						while (arr.length > 0)
+							positions.push(arr.splice(0, size).slice(2));
+		
+						var atom = group[j];
+						atom.position.set( positions[i][j].x, positions[i][j].y, positions[i][j].z );
+					})
+				}
+		})	
+	}
     // Sets up the scene.
     function init() {
-		// Create the scene and set the scene size.
 		scene = new THREE.Scene();
 		var WIDTH = window.innerWidth;
 			HEIGHT = window.innerHeight;
 
-		// Create a renderer and add it to the DOM.
 		renderer = new THREE.WebGLRenderer({antialias:true});
 		renderer.setSize(WIDTH, HEIGHT);
 		document.body.appendChild(renderer.domElement);
-
-		// Create a camera, zoom it out from the model a bit, and add it to the scene.
-		//camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 1, 10000);
-		//camera.position.set( 30, 30, 30 );
 		
 		camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 5000 );
-		camera.position.set( 25, 25, 25 );
+		camera.position.set( 30, 20, 10);
 		camera.lookAt( new THREE.Vector3() );
 
 		scene.add(camera);
@@ -157,42 +213,37 @@
 		camera.updateProjectionMatrix();
 		});
 
-		// Set the background color of the scene.
 		renderer.setClearColor(0x333F47, 1);
 
-		// Create a light, set its position, and add it to the scene.
 		var light = new THREE.PointLight(0xffffff);
 		light.position.set(100,100,250);
 		scene.add(light);
 
 		group = [];
-	
-		var bitmap = new Image();
-		bitmap.src = 'models/white.jpg'
-		var texture = THREE.ImageUtils.loadTexture(bitmap.src); // Create texture object based on the given bitmap path.
-		var material = new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0x050505, shininess: 50, map: texture }); // Create a material (for the spherical mesh) that reflects light, potentially causing sphere surface shadows.
+		var material = new THREE.MeshPhongMaterial({ color: Colors.white, specular: 0x050505, shininess: 50 }); 
 		var geometry = new THREE.SphereGeometry(1, 64, 64); // Radius size, number of vertical segments, number of horizontal rings.
 		var sphere = new THREE.Mesh(geometry, material); 
-	
-		fetch('Une_image_256_atomes.txt').then(response => response.text()).then(text => {
-		  const atoms = text.split('\n')  // split into lines
-			.map(line => line.trim())     // remove whitespace at the beginning and end
-			.map(line => line.split(' ')) // split by ' '
-			.map(([size, x, y, z]) => ({ 
-			  size: Number(size), 
-			  x: Number(x), 
-			  y: Number(y), 
-			  z: Number(z) 
-			}));
-			
-			for (var i = 0; i < atoms.length; i++) {
+		
+		positions = [];
+		fetch('Petit_film_256_atomes.txt').then(response => response.text()).then(text => {
+			const arr = text.split('\n')
+				.map(line => line.trim())
+				.map((arr) => arr.split(' '))
+				.map(([size, x, y, z]) => ({ 
+					  size: Number(size), 
+					  x: Number(x), 
+					  y: Number(y), 
+					  z: Number(z) 
+				}));
+			while (arr.length > 0)
+				positions.push(arr.splice(0, size).slice(2));					 
+			for (var i = 0; i < 256; i++) {
 				atom = sphere.clone();
-				atom.position.set( atoms[i].x, atoms[i].y, atoms[i].z );
-				atom.name = "atom";
+				atom.position.set( positions[0][i].x, positions[0][i].y, positions[0][i].z );
 				scene.add( atom );
 				group.push( atom );
-			}			
-		});
+			}	
+		})	
 	
 		//make the image even on the sphere
 		var faceVertexUvs = geometry.faceVertexUvs[ 0 ];
@@ -221,12 +272,11 @@
 		var intersects = raycaster.intersectObjects( group );
 		
 		if (intersects.length > 0) {
-		
-		var text = THREE.ImageUtils.loadTexture( "models/red.jpg" ); 
-		var mat = new THREE.MeshPhongMaterial({name: "test", map: text});
-			//console.log(intersects[ 0 ].object)
-			intersects[ 0 ].object.material = mat;
-			intersects[ 0 ].object.material.needsUpdate = true;
+			//var text = THREE.ImageUtils.loadTexture( "models/red.jpg" ); 
+			var mat = new THREE.MeshPhongMaterial({ color: Colors.red, specular: 0x050505, shininess: 50 });
+				//console.log(intersects[ 0 ].object)
+				intersects[ 0 ].object.material = mat;
+				intersects[ 0 ].object.material.needsUpdate = true;
 		}
 	}	
 
