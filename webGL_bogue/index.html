@@ -90,7 +90,12 @@
 					positions.push(arr.splice(0, size).slice(2));
 				}
 			console.log(positions);
-			init();
+			try {
+				init();
+			}
+			catch(err) {
+				console.log("error");
+			}
 		})
 	}
 	
@@ -212,6 +217,7 @@
 			}
 		}
 		controls = new THREE.OrbitControls(camera, renderer.domElement);
+		controls.update();
 	}
 	
 	/*window.requestAnimationFrame = (function(){
@@ -291,8 +297,12 @@
 
     function animate() {
       requestAnimationFrame(animate);
-      renderer.render(scene, camera);
-      controls.update();
+	  if(renderer) {
+      	renderer.render(scene, camera);
+	  }
+	  if(controls) {
+      	controls.update();
+	  }
     }
   </script>
 
